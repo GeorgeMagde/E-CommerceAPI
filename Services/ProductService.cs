@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.TagHelpers;
+using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.EntityFrameworkCore;
 using NoobProject.Contexts;
 using NoobProject.Dtos.ProductDtos;
@@ -79,8 +79,50 @@ namespace NoobProject.Services {
                 Description = product.Description,
                 Price = product.Price,
                 Stock = product.Stock,
-                Image = !string.IsNullOrEmpty(imagePath)? imageHelper.ResolveImageUrl(imagePath, requestScheme, requestHost): null
+                Image = !string.IsNullOrEmpty(imagePath) ? imageHelper.ResolveImageUrl(imagePath, requestScheme, requestHost) : null
             };
+        }
+        public async Task<ProductResponseDto?> UpdateProductAsync(int id, UpdateProductDto dto, string requestScheme, string requestHost) {
+            var product = await context.Products.FindAsync(id);
+            if (product == null) return null;
+
+            if (dto.Name != null) product.Name = dto.Name;
+            if (dto.Description != null) product.Description = dto.Description;
+            if (dto.Price.HasValue) product.Price = dto.Price.Value;
+            if (dto.Stock.HasValue) product.Stock = dto.Stock.Value;
+
+            if (dto.ImageFile != null && dto.ImageFile.Length > 0) {
+                // Delete old image if it exists
+                if (!string.IsNullOrEmpty(product.Image)) {
+                    await imageHelper.DeleteImage(product.Image);
+                }
+                // Save new image
+                product.Image = await imageHelper.SaveImageAsync(dto.ImageFile);
+            }
+
+            await context.SaveChangesAsync();
+
+            return new ProductResponseDto {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Stock = product.Stock,
+                Image = !string.IsNullOrEmpty(product.Image) ? imageHelper.ResolveImageUrl(product.Image, requestScheme, requestHost) : null
+            };
+        }
+
+        public async Task<bool> DeleteProductAsync(int id) {
+            var product = await context.Products.FindAsync(id);
+            if (product == null) return false;
+
+            if (!string.IsNullOrEmpty(product.Image)) {
+                await imageHelper.DeleteImage(product.Image);
+            }
+
+            context.Products.Remove(product);
+            await context.SaveChangesAsync();
+            return true;
         }
     }
 }
