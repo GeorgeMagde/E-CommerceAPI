@@ -31,7 +31,6 @@ namespace NoobProject.Controllers {
         }
 
         // POST: api/product 
-        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateProduct([FromForm] CreateUpdateProductDto dto) {
             // Note: [ApiController] automatically returns 400 Bad Request if the DTO validation fails.

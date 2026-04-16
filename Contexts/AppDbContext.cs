@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using NoobProject.Models;
+using System.Reflection.Emit;
 
 namespace NoobProject.Contexts {
     public class AppDbContext : IdentityDbContext<AppUser> {
@@ -10,6 +11,8 @@ namespace NoobProject.Contexts {
         }
 
         public DbSet<Product> Products { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartEntry> CartEntries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder) {
             base.OnModelCreating(builder); 
@@ -20,6 +23,9 @@ namespace NoobProject.Contexts {
                 entity.Property(p => p.Description).HasMaxLength(1000);
                 entity.Property(p => p.Price).HasColumnType("decimal(18,2)");
             });
+            builder.Entity<Cart>()
+                .HasIndex(c => c.UserId)
+                .IsUnique();
         }
     }
 }

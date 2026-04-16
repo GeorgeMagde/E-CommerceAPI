@@ -51,26 +51,34 @@ namespace NoobProject.Services {
             };
         }
 
-        public async Task<ProductResponseDto> CreateProductAsync(CreateUpdateProductDto dto) {
+        public async Task<ProductResponseDto> CreateProductAsync(CreateUpdateProductDto dto)
+        {
             string imagePath = string.Empty;
 
-           
-            if (dto.ImageFile != null && dto.ImageFile.Length > 0) {
+            if (dto.ImageFile != null && dto.ImageFile.Length > 0)
+            {
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.ImageFile.FileName);
-                var uploadsFolder = Path.Combine(environment.WebRootPath, "images");
 
-                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+                var webRoot = environment.WebRootPath
+                              ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+                var uploadsFolder = Path.Combine(webRoot, "images");
+
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
 
                 var filePath = Path.Combine(uploadsFolder, fileName);
 
-                using (var fileStream = new FileStream(filePath, FileMode.Create)) {
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
                     await dto.ImageFile.CopyToAsync(fileStream);
                 }
 
                 imagePath = $"/images/{fileName}";
             }
 
-            var product = new Product {
+            var product = new Product
+            {
                 Name = dto.Name,
                 Description = dto.Description,
                 Price = dto.Price,
@@ -81,7 +89,8 @@ namespace NoobProject.Services {
             context.Products.Add(product);
             await context.SaveChangesAsync();
 
-            return new ProductResponseDto {
+            return new ProductResponseDto
+            {
                 Id = product.Id,
                 Name = product.Name,
                 Description = product.Description,
