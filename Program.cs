@@ -45,6 +45,8 @@ namespace NoobProject {
             // 4. Dependency Injection for Custom Services
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<ICartService, CartService>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -84,6 +86,8 @@ namespace NoobProject {
             }
 
             app.UseHttpsRedirection();
+
+            app.UseStaticFiles();
 
             // Authentication MUST be before Authorization
             app.UseAuthentication();
