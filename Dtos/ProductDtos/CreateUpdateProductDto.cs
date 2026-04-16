@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace NoobProject.Dtos {
+namespace NoobProject.Dtos.ProductDtos {
     public class CreateUpdateProductDto {
         [Required(ErrorMessage = "Product name is required.")]
         [StringLength(150, MinimumLength = 3, ErrorMessage = "Name must be between 3 and 150 characters.")]

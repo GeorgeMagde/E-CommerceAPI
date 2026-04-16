@@ -1,4 +1,4 @@
-﻿using NoobProject.Dtos;
+﻿using NoobProject.Dtos.ProductDtos;
 
 namespace NoobProject.Services {
     public interface IProductService {

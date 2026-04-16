@@ -1,4 +1,4 @@
-﻿namespace NoobProject.Dtos {
+﻿namespace NoobProject.Dtos.ProductDtos {
     public class ProductResponseDto {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;

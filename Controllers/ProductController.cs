@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NoobProject.Dtos;
+using NoobProject.Dtos.ProductDtos;
 using NoobProject.Services;
 
 namespace NoobProject.Controllers {

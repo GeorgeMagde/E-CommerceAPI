@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NoobProject.Contexts;
-using NoobProject.Dtos;
+using NoobProject.Dtos.ProductDtos;
 using NoobProject.Models;
 
 namespace NoobProject.Services {
@@ -16,8 +16,8 @@ namespace NoobProject.Services {
         public async Task<IEnumerable<ProductResponseDto>> GetProductsAsync(ProductQueryParameters queryParams) {
             var query = context.Products.AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(queryParams.SearchTerm))
-                query = query.Where(p => p.Name.Contains(queryParams.SearchTerm));
+            if (!string.IsNullOrWhiteSpace(queryParams.SearchName))
+                query = query.Where(p => p.Name.Contains(queryParams.SearchName));
 
             if (queryParams.MinPrice.HasValue)
                 query = query.Where(p => p.Price >= queryParams.MinPrice.Value);
