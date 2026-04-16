@@ -14,17 +14,19 @@ namespace NoobProject.Controllers {
             this.productService = productService;
         }
 
-        // GET: api/product?searchTerm=laptop&minPrice=500&maxPrice=1500
+        // GET: api/product?SearchName=laptop&minPrice=500&maxPrice=1500
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetProducts([FromQuery] ProductQueryParameters queryParams) {
-            var products = await productService.GetProductsAsync(queryParams);
+            var products = await productService.GetProductsAsync(queryParams, Request.Scheme, Request.Host.Value);
             return Ok(products);
         }
 
         // GET: api/product/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetProduct(int id) {
-            var product = await productService.GetProductByIdAsync(id);
+            var product = await productService.GetProductByIdAsync(id, Request.Scheme, Request.Host.Value);
             if (product == null) return NotFound("Product not found.");
 
             return Ok(product);
@@ -34,9 +36,9 @@ namespace NoobProject.Controllers {
         [HttpPost]
         public async Task<IActionResult> CreateProduct([FromForm] CreateUpdateProductDto dto) {
             // Note: [ApiController] automatically returns 400 Bad Request if the DTO validation fails.
-            var createdProduct = await productService.CreateProductAsync(dto);
+            var createdProduct = await productService.CreateProductAsync(dto, Request.Scheme, Request.Host.Value);
 
-            return CreatedAtAction(nameof(GetProduct), new { id = createdProduct.Id }, createdProduct);
+            return Ok(createdProduct);
         }
     }
 }

@@ -3,16 +3,20 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using NoobProject.Contexts;
+using NoobProject.Helper;
 using NoobProject.Models;
 using NoobProject.Services;
 using System.Text;
-using Microsoft.OpenApi.Models;
 
 namespace NoobProject {
     public class Program {
         public static void Main(string[] args) {
             var builder = WebApplication.CreateBuilder(args);
+
+
+           
 
             // 1. Database Configuration
             builder.Services.AddDbContext<AppDbContext>(options =>
@@ -22,6 +26,17 @@ namespace NoobProject {
             builder.Services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
+
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                // Default Password settings.
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 6; // Increased from 6 to 8
+                options.Password.RequiredUniqueChars = 1;
+            });
 
             // 3. JWT Authentication Configuration
             var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -47,9 +62,11 @@ namespace NoobProject {
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<ICartService, CartService>();
+            builder.Services.AddSingleton<ImageHelper, ImageHelper>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
+
             builder.Services.AddSwaggerGen(options => {
                 // 1. Define the security scheme (Tells Swagger to expect a Bearer token)
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
@@ -92,6 +109,7 @@ namespace NoobProject {
             // Authentication MUST be before Authorization
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseStaticFiles();
 
             app.MapControllers();
 

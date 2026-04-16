@@ -3,14 +3,14 @@
 namespace NoobProject.Dtos.ProductDtos {
     public class CreateUpdateProductDto {
         [Required(ErrorMessage = "Product name is required.")]
-        [StringLength(150, MinimumLength = 3, ErrorMessage = "Name must be between 3 and 150 characters.")]
+        [StringLength(150, MinimumLength = 2, ErrorMessage = "Name must be between 2 and 150 characters.")]
         public string Name { get; set; } = string.Empty;
 
         [MaxLength(1000, ErrorMessage = "Description cannot exceed 1000 characters.")]
-        public string Description { get; set; } = string.Empty;
+        public string? Description { get; set; } = string.Empty;
 
         [Required]
-        [Range(0.01, 100000, ErrorMessage = "Price must be greater than zero.")]
+        [Range(0.01, 100000, ErrorMessage = "Price must be between 0.01 and 100000.")]
         public decimal Price { get; set; }
 
         [Required]

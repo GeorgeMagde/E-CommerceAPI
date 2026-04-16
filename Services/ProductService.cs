@@ -1,19 +1,23 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc.TagHelpers;
+using Microsoft.EntityFrameworkCore;
 using NoobProject.Contexts;
 using NoobProject.Dtos.ProductDtos;
+using NoobProject.Helper;
 using NoobProject.Models;
 
 namespace NoobProject.Services {
     public class ProductService : IProductService {
         private readonly AppDbContext context;
         private readonly IWebHostEnvironment environment;
+        private readonly ImageHelper imageHelper;
 
-        public ProductService(AppDbContext _context, IWebHostEnvironment _environment) {
+        public ProductService(AppDbContext _context, IWebHostEnvironment _environment, ImageHelper imageHelper) {
             context = _context;
             environment = _environment;
+            this.imageHelper = imageHelper;
         }
 
-        public async Task<IEnumerable<ProductResponseDto>> GetProductsAsync(ProductQueryParameters queryParams) {
+        public async Task<IEnumerable<ProductResponseDto>> GetProductsAsync(ProductQueryParameters queryParams, string requestScheme, string requestHost) {
             var query = context.Products.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(queryParams.SearchName))
@@ -33,11 +37,11 @@ namespace NoobProject.Services {
                 Description = p.Description,
                 Price = p.Price,
                 Stock = p.Stock,
-                Image = p.Image
+                Image = !string.IsNullOrEmpty(p.Image) ? imageHelper.ResolveImageUrl(p.Image, requestScheme, requestHost) : null
             });
         }
 
-        public async Task<ProductResponseDto?> GetProductByIdAsync(int id) {
+        public async Task<ProductResponseDto?> GetProductByIdAsync(int id, string requestScheme, string requestHost) {
             var p = await context.Products.FindAsync(id);
             if (p == null) return null;
 
@@ -47,38 +51,18 @@ namespace NoobProject.Services {
                 Description = p.Description,
                 Price = p.Price,
                 Stock = p.Stock,
-                Image = p.Image
+                Image = !string.IsNullOrEmpty(p.Image) ? imageHelper.ResolveImageUrl(p.Image, requestScheme, requestHost) : null
             };
         }
 
-        public async Task<ProductResponseDto> CreateProductAsync(CreateUpdateProductDto dto)
-        {
-            string imagePath = string.Empty;
+        public async Task<ProductResponseDto> CreateProductAsync(CreateUpdateProductDto dto, string requestScheme, string requestHost) {
+            string imagePath = null;
 
-            if (dto.ImageFile != null && dto.ImageFile.Length > 0)
-            {
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.ImageFile.FileName);
-
-                var webRoot = environment.WebRootPath
-                              ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-
-                var uploadsFolder = Path.Combine(webRoot, "images");
-
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                var filePath = Path.Combine(uploadsFolder, fileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await dto.ImageFile.CopyToAsync(fileStream);
-                }
-
-                imagePath = $"/images/{fileName}";
+            if (dto.ImageFile != null && dto.ImageFile.Length > 0) {
+                imagePath = await imageHelper.SaveImageAsync(dto.ImageFile);
             }
 
-            var product = new Product
-            {
+            var product = new Product {
                 Name = dto.Name,
                 Description = dto.Description,
                 Price = dto.Price,
@@ -89,14 +73,13 @@ namespace NoobProject.Services {
             context.Products.Add(product);
             await context.SaveChangesAsync();
 
-            return new ProductResponseDto
-            {
+            return new ProductResponseDto {
                 Id = product.Id,
                 Name = product.Name,
                 Description = product.Description,
                 Price = product.Price,
                 Stock = product.Stock,
-                Image = product.Image
+                Image = !string.IsNullOrEmpty(imagePath)? imageHelper.ResolveImageUrl(imagePath, requestScheme, requestHost): null
             };
         }
     }
