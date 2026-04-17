@@ -12,7 +12,7 @@ using System.Text;
 
 namespace NoobProject {
     public class Program {
-        public static void Main(string[] args) {
+        public static async Task Main(string[] args) {
             var builder = WebApplication.CreateBuilder(args);
 
 
@@ -97,6 +97,49 @@ namespace NoobProject {
 
             var app = builder.Build();
 
+            // Seed Roles and Admin User
+            using (var scope = app.Services.CreateScope())
+            {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+
+                // Seed Roles
+                string[] roles = { "Admin", "User" };
+                foreach (var role in roles)
+                {
+                    if (!await roleManager.RoleExistsAsync(role))
+                    {
+                        await roleManager.CreateAsync(new IdentityRole(role));
+                    }
+                }
+
+                // Seed Admin User
+                var adminEmail = "admin@ecommerce.com";
+                var adminUser = await userManager.FindByEmailAsync(adminEmail);
+                if (adminUser == null)
+                {
+                    adminUser = new AppUser
+                    {
+                        UserName = "admin",
+                        Email = adminEmail,
+                        Name = "System Admin",
+                        EmailConfirmed = true,
+                        IsActive = true
+                    };
+                    var result = await userManager.CreateAsync(adminUser, "Admin123");
+                    if (result.Succeeded)
+                    {
+                        await userManager.AddToRoleAsync(adminUser, "Admin");
+                    }
+                }
+                else
+                {
+                    // Ensure the password is up to date for the existing admin
+                    var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
+                    await userManager.ResetPasswordAsync(adminUser, token, "Admin123");
+                }
+            }
+
             if (app.Environment.IsDevelopment()) {
                 app.UseSwagger();
                 app.UseSwaggerUI();
@@ -113,7 +156,7 @@ namespace NoobProject {
 
             app.MapControllers();
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }

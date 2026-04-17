@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using NoobProject.Dtos.AuthDtos;
 using NoobProject.Models;
@@ -26,6 +26,7 @@ namespace NoobProject.Services {
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Email,
                 Name = model.Name,
+                PhoneNumber = model.PhoneNumber,
                 IsActive = true
             };
 
@@ -34,6 +35,9 @@ namespace NoobProject.Services {
                 var firstError = result.Errors.FirstOrDefault()?.Description;
                 return new AuthResponseDto { IsSuccess = false, Message = firstError ?? "User creation failed!" };
             }
+
+            // Assign "User" role
+            await _userManager.AddToRoleAsync(user, "User");
 
             return new AuthResponseDto { IsSuccess = true, Message = "User created successfully!" };
         }

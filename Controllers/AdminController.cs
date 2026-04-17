@@ -12,7 +12,7 @@ using System.Security.Claims;
 namespace NoobProject.Controllers {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(Roles ="Admin")]
+    [Authorize(Roles ="Admin")]
 
     public class AdminController : ControllerBase {
         private readonly UserManager<AppUser> _userManager;
@@ -32,6 +32,7 @@ namespace NoobProject.Controllers {
                     u.Id,
                     u.Name,
                     u.Email,
+                    u.PhoneNumber,
                     u.IsActive
                 })
                 .ToListAsync();
@@ -95,6 +96,22 @@ namespace NoobProject.Controllers {
 
             if (result.Succeeded)
                 return Ok(new { Message = $"User {(user.IsActive ? "activated" : "deactivated")} successfully." });
+
+            return BadRequest(result.Errors);
+        }
+
+        [HttpDelete("users/{userId}")]
+        public async Task<IActionResult> DeleteUser(string userId) {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return NotFound("User not found");
+
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (user.Id == currentUserId) return BadRequest("You cannot delete your own account.");
+
+            var result = await _userManager.DeleteAsync(user);
+
+            if (result.Succeeded)
+                return Ok(new { Message = "User deleted successfully" });
 
             return BadRequest(result.Errors);
         }
