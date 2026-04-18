@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NoobProject.Contexts;
 using NoobProject.Dtos;
+using NoobProject.Dtos.CartDtos;
 using NoobProject.Models;
 
 namespace NoobProject.Services

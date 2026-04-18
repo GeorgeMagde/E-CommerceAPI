@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NoobProject.Dtos;
+using NoobProject.Dtos.CartDtos;
 using NoobProject.Services;
 using System.Security.Claims;
 

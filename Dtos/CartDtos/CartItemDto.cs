@@ -1,4 +1,4 @@
-﻿namespace NoobProject.Dtos
+﻿namespace NoobProject.Dtos.CartDtos
 {
     public class CartItemDto
     {

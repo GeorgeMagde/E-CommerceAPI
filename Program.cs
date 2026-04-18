@@ -64,6 +64,10 @@ namespace NoobProject {
             builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddSingleton<ImageHelper, ImageHelper>();
 
+            // PayPal Integration
+            builder.Services.Configure<PayPalSettings>(builder.Configuration.GetSection("PayPal"));
+            builder.Services.AddHttpClient<IPayPalService, PayPalService>();
+
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
 
