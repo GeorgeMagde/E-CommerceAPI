@@ -68,6 +68,18 @@ namespace NoobProject {
             builder.Services.Configure<PayPalSettings>(builder.Configuration.GetSection("PayPal"));
             builder.Services.AddHttpClient<IPayPalService, PayPalService>();
 
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+            });
+
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
 
@@ -151,7 +163,10 @@ namespace NoobProject {
 
             app.UseHttpsRedirection();
 
+            app.UseCors("AllowAll");
+
             app.UseStaticFiles();
+
 
             // Authentication MUST be before Authorization
             app.UseAuthentication();
